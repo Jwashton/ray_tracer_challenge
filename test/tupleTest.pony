@@ -1,4 +1,5 @@
 use "ponytest"
+use ".."
 
 actor Main is TestList
   new create(env: Env) =>
