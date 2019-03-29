@@ -1,7 +1,7 @@
 use "ponytest"
 use ".."
 
-actor Main is TestList
+actor TupleTests is TestList
   new create(env: Env) =>
     PonyTest(env, this)
 
