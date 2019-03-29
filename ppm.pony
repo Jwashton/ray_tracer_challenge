@@ -21,5 +21,9 @@ primitive PPM
         out.write(pixel.red().string() + " " +
                   pixel.green().string() + " " +
                   pixel.blue().string())
+
+        x = x + 1
       end
+
+      y = y + 1
     end

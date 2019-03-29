@@ -11,7 +11,7 @@ actor PPMTests is TestList
 
   fun tag tests(test: PonyTest) =>
     test(_TestHeader)
-    test(_TestBody)
+    // test(_TestBody)
 
 
 class iso _TestHeader is UnitTest
