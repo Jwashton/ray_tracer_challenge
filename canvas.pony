@@ -12,10 +12,10 @@ class Canvas
     CanvasPixels(_pixels)
 
   fun ref write_pixel(x: USize, y: USize, color: Color) ? =>
-    _pixels.update(x * y, color)?
+    _pixels.update((y * width) + x, color)?
 
   fun ref apply(x: USize, y: USize): Color ? =>
-    _pixels(x * y)?
+    _pixels((y * width) + x)?
 
 
 class CanvasPixels is Iterator[Color]

@@ -12,6 +12,8 @@ actor PPMTests is TestList
   fun tag tests(test: PonyTest) =>
     test(_TestHeader)
     test(_TestBody)
+    test(_TestLength)
+    test(_TestEnding)
 
 
 class iso _TestHeader is UnitTest
@@ -24,7 +26,7 @@ class iso _TestHeader is UnitTest
 
     let stream = _TestStream(h, promise)
 
-    PPM.from_canvas(c, stream)
+    try PPM.from_canvas(c, stream)? end
 
     stream.header()
     h.long_test(2_000_000_000) // 2 second timeout
@@ -55,7 +57,7 @@ class iso _TestBody is UnitTest
 
     let stream = _TestStream(h, promise)
 
-    PPM.from_canvas(c, stream)
+    try PPM.from_canvas(c, stream)? end
 
     stream.body()
     h.long_test(2_000_000_000) // 2 second timeout
@@ -70,6 +72,69 @@ class iso _TestBody is UnitTest
     0 0 0 0 0 0 0 128 0 0 0 0 0 0 0
     0 0 0 0 0 0 0 0 0 0 0 0 0 0 255
     """
+
+
+class iso _TestLength is UnitTest
+  fun name(): String => "Splitting long lines in PPM files"
+  fun apply(h: TestHelper) =>
+    let c = Canvas(10, 2)
+
+    setPixels(c)
+
+    let promise = Promise[String]
+    promise.next[None](recover this~_fulfill(h) end)
+
+    let stream = _TestStream(h, promise)
+
+    try PPM.from_canvas(c, stream)? end
+
+    stream.body()
+    h.long_test(2_000_000_000) // 2 second timeout
+
+  fun tag _fulfill(h: TestHelper, value: String) =>
+    h.assert_eq[String](value, expected())
+    h.complete(true)
+
+  fun tag expected(): String =>
+    """
+    255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
+    153 255 204 153 255 204 153 255 204 153 255 204 153
+    255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204
+    153 255 204 153 255 204 153 255 204 153 255 204 153
+    """
+
+  fun tag setPixels(canvas: Canvas) =>
+    var x: USize = 0
+    var y: USize = 0
+
+    while y < canvas.height do
+      while x < canvas.width do
+        try canvas.write_pixel(x, y, Color(1, 0.8, 0.6))? end
+        x = x + 1
+      end
+      y = y + 1
+      x = 0
+    end
+
+
+class iso _TestEnding is UnitTest
+  fun name(): String => "PPM files are terminated by a newline character"
+  fun apply(h: TestHelper) =>
+    let c = Canvas(5, 3)
+
+    let promise = Promise[String]
+    promise.next[None](recover this~_fulfill(h) end)
+
+    let stream = _TestStream(h, promise)
+
+    try PPM.from_canvas(c, stream)? end
+
+    stream.body()
+    h.long_test(2_000_000_000) // 2 second timeout
+
+  fun tag _fulfill(h: TestHelper, value: String) =>
+    h.assert_eq[String](value.substring(-1), "\n")
+    h.complete(true)
 
 
 actor _TestStream is OutStream
