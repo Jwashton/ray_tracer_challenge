@@ -10,6 +10,13 @@ class Projectile
     position = position'
     velocity = velocity'
 
+  new tick(projectile: Projectile, environment: Environment) =>
+    position = projectile.next()
+    velocity = projectile.velocity + environment.total()
+
+  fun next(): Tuple =>
+    position + velocity
+
 
 class Environment
   let gravity: Tuple
@@ -19,41 +26,51 @@ class Environment
     gravity = gravity'
     wind = wind'
 
+  fun total(): Tuple =>
+    gravity + wind
+
 
 actor Main
   new create(env: Env) =>
     // Projectile starts one unit above the origin.
     let start_pos = Tuple.point(0, 1, 0)
     // velocity is normalized to 1 unit/tick.
-    let start_vel = Tuple.vector(1, 1.2, 0).normalize()
+    let start_vel = Tuple.vector(1, 1.8, 0).normalize() * 11.25
     var projectile = Projectile(start_pos, start_vel)
 
-    let gravity = Tuple.vector(0, -0.08, 0)
-    let wind = Tuple.vector(-0.02, 0, 0)
+    let gravity = Tuple.vector(0, -0.1, 0)
+    let wind = Tuple.vector(-0.01, 0, 0)
     let environment = Environment(gravity, wind)
 
     var frame: U32 = 1
-    let canvas: Canvas = Canvas(110, 80)
+    let canvas: Canvas = Canvas(900, 550)
 
     while projectile.position.y >= 0 do
       env.out.print(frame.string() + ": " + projectile.position.string())
 
-      projectile = tick(environment, projectile)
-      try
-        canvas.write_pixel(
-          USize.from[F32](projectile.position.x * 10),
-          canvas.height - USize.from[F32](projectile.position.y * 10),
-          Color(0.8, 0, 0))?
-      end
+      projectile = Projectile.tick(projectile, environment)
+      draw_point(canvas, projectile.position)
       frame = frame + 1
     end
     render(env, canvas)
 
-  fun tick(environment: Environment, projectile: Projectile): Projectile =>
-    let position = projectile.position + projectile.velocity
-    let velocity = projectile.velocity + environment.gravity + environment.wind
+  fun draw_point(canvas: Canvas, position: Tuple) =>
+    let color = Color(0.8, 0, 0)
 
-    Projectile(position, velocity)
+    let x = USize.from[F32](position.x)
+    let y = canvas.height - USize.from[F32](position.y)
+
+    try
+      canvas.write_pixel(x - 1, y - 1, color)?
+      canvas.write_pixel(x,     y - 1, color)?
+      canvas.write_pixel(x + 1, y - 1, color)?
+      canvas.write_pixel(x - 1, y, color)?
+      canvas.write_pixel(x,     y, color)?
+      canvas.write_pixel(x + 1, y, color)?
+      canvas.write_pixel(x - 1, y + 1, color)?
+      canvas.write_pixel(x,     y + 1, color)?
+      canvas.write_pixel(x + 1, y + 1, color)?
+    end
 
   fun render(env: Env, canvas: Canvas) =>
     try
