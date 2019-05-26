@@ -12,3 +12,4 @@ actor Main is TestList
     ColorTests.make().tests(test)
     CanvasTests.make().tests(test)
     PPMTests.make().tests(test)
+    MatrixTests.make().tests(test)

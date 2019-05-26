@@ -1,5 +1,3 @@
-primitive TupleHelper
-
 trait ForgivingFloats
   fun _epsilon(): F32 => 0.00001
 

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-(cd test && ponyc && time ./test --noprog)
+(cd test && ponyc && time ./test --noprog --ponythreads 3)
